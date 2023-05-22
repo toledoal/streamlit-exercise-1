@@ -34,7 +34,8 @@ def processText():
 
 def run():
     docs = [Document(page_content=t) for t in processText()[:3]]
-    chain = load_summarize_chain(load_LLM(st.secrets["OPENAI_KEY"]), chain_type="map_reduce", verbose=True)
+    key = st.secrets["OPENAI_KEY"]
+    chain = load_summarize_chain(load_LLM(key), chain_type="map_reduce", verbose=True)
     return chain.run(docs)
 
 st.title("Main")
