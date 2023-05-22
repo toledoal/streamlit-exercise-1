@@ -1,4 +1,5 @@
 
+import os
 import streamlit as st
 
 from langchain.chains.summarize import load_summarize_chain
@@ -27,7 +28,7 @@ def getFile():
 def processText():
     if file is not None:
         text_splitter = CharacterTextSplitter()
-        with open(file.name) as f:
+        with open(os.getcwd() + "/" + file.name) as f:
             moby_dick = f.read()
             texts = text_splitter.split_text(moby_dick)
         return texts
