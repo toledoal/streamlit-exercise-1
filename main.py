@@ -20,20 +20,19 @@ def load_LLM(openai_api_key):
     return llm
 
 
-def getFile():
-    if file is not None:
-        return file.getvalue().decode('utf-8').splitlines() 
+def getFile(file):
+    return file.getvalue()
     
 
 def processText():
     if file is not None:
-        text_splitter = CharacterTextSplitter()
-        with open(os.getcwd() + "/" + file.name) as f:
-            moby_dick = f.read()
-            texts = text_splitter.split_text(moby_dick)
+        text_splitter = CharacterTextSplitter("\\r\\n\\r\\n")
+        sd = str(getFile(file))
+        texts = text_splitter.split_text(sd)
+        print(texts)
         return texts
     else:
-        return ""
+        return []
 
 
 def run():
@@ -47,6 +46,8 @@ st.write("## Summarize this book")
 
 
 file = st.file_uploader("Upload a file", type="txt")
+
+
 st.session_state["file"] = file
 
 numberOfDocuments = 0
