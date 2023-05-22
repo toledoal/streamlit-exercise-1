@@ -2,3 +2,4 @@ langchain==0.0.177
 qdrant_client==1.1.7
 sentence_transformers==2.2.2
 streamlit==1.16.0
+openai
