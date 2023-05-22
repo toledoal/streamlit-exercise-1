@@ -1,22 +1,20 @@
 
-import os
+
 import streamlit as st
 
 from langchain.chains.summarize import load_summarize_chain
 from langchain.docstore.document import Document
 
-from langchain import OpenAI, PromptTemplate, LLMChain
+from langchain import OpenAI
 from langchain.text_splitter import CharacterTextSplitter
-from langchain.chains.mapreduce import MapReduceChain
-from langchain.prompts import PromptTemplate
+
 
 
 def load_LLM(openai_api_key):
+    print(openai_api_key)
     """Logic for loading the chain you want to use should go here."""
     # Make sure your openai_api_key is set as an environment variable
-    llm = OpenAI(
-        temperature=0.5, openai_api_key=openai_api_key, model_name="text-davinci-003"
-    )
+    llm = OpenAI(openai_api_key=openai_api_key)
     return llm
 
 
