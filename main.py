@@ -21,15 +21,14 @@ def load_LLM(openai_api_key):
 
 
 def getFile(file):
-    return file.getvalue()
+    return file.getvalue().decode("utf-8").splitlines()
     
 
 def processText():
     if file is not None:
-        text_splitter = CharacterTextSplitter("\\r\\n\\r\\n")
+        text_splitter = CharacterTextSplitter(" ")
         sd = str(getFile(file))
         texts = text_splitter.split_text(sd)
-        print(texts)
         return texts
     else:
         return []
