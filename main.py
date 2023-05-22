@@ -10,8 +10,8 @@ from langchain.text_splitter import CharacterTextSplitter
 
 
 
-def load_LLM(openai_api_key):
-    print(openai_api_key)
+def load_LLM():
+    #print(openai_api_key)
     """Logic for loading the chain you want to use should go here."""
     # Make sure your openai_api_key is set as an environment variable
     llm = OpenAI()
@@ -34,8 +34,8 @@ def processText():
 
 def run():
     docs = [Document(page_content=t) for t in processText()[:3]]
-    key = st.secrets["OPENAI_KEY"]
-    chain = load_summarize_chain(load_LLM(key), chain_type="map_reduce", verbose=True)
+    # key = st.secrets["OPENAI_KEY"]
+    chain = load_summarize_chain(load_LLM(), chain_type="map_reduce", verbose=True)
     return chain.run(docs)
 
 st.title("Main")
