@@ -14,7 +14,7 @@ def load_LLM(openai_api_key):
     print(openai_api_key)
     """Logic for loading the chain you want to use should go here."""
     # Make sure your openai_api_key is set as an environment variable
-    llm = OpenAI(openai_api_key=openai_api_key)
+    llm = OpenAI()
     return llm
 
 
