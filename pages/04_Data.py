@@ -1,9 +1,7 @@
 
 # Path: pages/data.py
-import os
 import streamlit as st
 from qdrant_client import models, QdrantClient
-from langchain.vectorstores import Qdrant
 from sentence_transformers import SentenceTransformer
 
 
