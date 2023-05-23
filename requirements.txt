@@ -1,7 +1,9 @@
-langchain
+langchain==0.0.178
+moviepy==1.0.3
+openai==0.27.4
 qdrant_client==1.1.7
 sentence_transformers==2.2.2
 streamlit==1.16.0
-openai
 tiktoken
-moviepy==1.0.3
+
+
