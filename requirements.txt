@@ -4,3 +4,4 @@ sentence_transformers==2.2.2
 streamlit==1.16.0
 openai
 tiktoken
+moviepy==1.0.3
