@@ -7,37 +7,98 @@ from langchain.chains.summarize import load_summarize_chain
 from langchain.prompts import PromptTemplate
 from langchain.docstore.document import Document
 from langchain.text_splitter import CharacterTextSplitter
-from langchain import OpenAI
+from langchain import LLMChain, OpenAI
 import openai
 
 llm = OpenAI(temperature=0)
 
 
 def summarize(transcription):
-    text_splitter = CharacterTextSplitter()
+    text_splitter = CharacterTextSplitter(
+        separator=". ",
+        chunk_size=3000,
+        chunk_overlap=200,
+        length_function=len,
+    )
     texts = text_splitter.split_text(transcription)
-    docs = [Document(page_content=t) for t in texts[:3]]
-    prompt_template = """Write a concise summary in markdown format of the following:
-    {text}
-    CONCISE SUMMARY:"""
-    PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
-    chain = load_summarize_chain(llm, chain_type="stuff", prompt=PROMPT)
+    print(len(texts))
+    print(texts[0])
+    docs = [Document(page_content=t) for t in texts]
+    print(len(docs))
+
+    chain = load_summarize_chain(llm, chain_type="map_reduce", verbose=True)
     return chain.run(docs)
 
 
 def tasks(transcription):
-    text_splitter = CharacterTextSplitter()
+    text_splitter = CharacterTextSplitter(
+        separator=". ",
+        chunk_size=3000,
+        chunk_overlap=200,
+        length_function=len,
+    )
     texts = text_splitter.split_text(transcription)
-    docs = [Document(page_content=t) for t in texts[:3]]
-    prompt_template = """Extract the possible tasks and people responsible, in a markdown format list, of the following:
+    docs = [Document(page_content=t) for t in texts[:2]]
+    print(docs)
+
+    prompt_template = """Extract the possible tasks of the CONTEXT, like in the following example:
+    EXAMPLE:
+    TASKS:
+    1. Create an object (assign to Mariana)
+    2. Assign the task to Pedro (assign to Pedro)
+    3. Recreate the design and image (assign to Josh)
+    4. Call the client (not yet assigned)
+    CONTEXT:
     {text}
     TASKS:"""
     PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
-    chain = load_summarize_chain(llm, chain_type="stuff", prompt=PROMPT)
-    return chain.run(docs)
+
+    # list comprehension to create a list of load_summarize_chain objects
+    # chain = load_summarize_chain(llm, chain_type="stuff", prompt=PROMPT, verbose=True)
+
+    # list comprehension to run each document through its corresponding chain
+
+    tasks = [
+        load_summarize_chain(llm, chain_type="stuff", prompt=PROMPT, verbose=True).run(
+            [doc]
+        )
+        for doc in docs
+    ]
+
+    prompt_template = "Create a single list and remove duplicated information: {text}?"
+
+    llm_chain = LLMChain(llm=llm, prompt=PromptTemplate.from_template(prompt_template))
+
+    text = " ".join(tasks)
+
+    result = llm_chain(text)
+    return result["text"]
 
 
-def save_file_to_tmp(file):
+def save_audio_to_tmp(file):
+    with tempfile.TemporaryDirectory() as temp_dir:
+        # Create a temporary file path
+        temp_file_path = os.path.join(temp_dir, file.name)
+
+        with open(temp_file_path, "wb") as f:
+            f.write(file.read())
+
+        # temp_output_file_path = os.path.join(temp_dir, "extracted_audio.mp3")
+        # # Save the file into the temporary folder
+        transcript = ""
+        with open(temp_file_path, "rb") as f:
+            transcript = openai.Audio.transcribe(
+                file=f,
+                model="whisper-1",
+                response_format="text",
+            )
+        return transcript
+
+
+# extract_audio_from_video(temp_file_path, temp_output_file_path)
+
+
+def save_video_to_tmp(file):
     with tempfile.TemporaryDirectory() as temp_dir:
         # Create a temporary file path
         temp_file_path = os.path.join(temp_dir, file.name)
@@ -73,14 +134,22 @@ def app():
 st.title("WhisperAI Transcription service")
 
 
-audioFile = st.file_uploader("Upload a file", type="mp4")
+audioFile = st.file_uploader("Upload a file", type=["mp4", "mp3"])
+
 if audioFile is not None:
     with st.spinner("Whisper is processing your file..."):
-        with st.expander("Video"):
-            st.video(audioFile)
+        st.write(audioFile.type)
+        if audioFile.type == "audio/mpeg":
+            with st.expander("Audio"):
+                st.audio(audioFile)
+                transcription = save_audio_to_tmp(audioFile)
+        else:
+            audioFile.type == "video/mp4"
+            with st.expander("Video"):
+                st.video(audioFile)
+                transcription = save_video_to_tmp(audioFile)
 
         st.session_state["audioFile"] = audioFile
-        transcription = save_file_to_tmp(audioFile)
 
         with st.expander("Transcription"):
             st.write(transcription)
@@ -94,6 +163,6 @@ if audioFile is not None:
 
         tasks = tasks(transcription)
         st.write("## Tasks")
-        st.markdown(tasks)
+        st.write(tasks)
 
         st.success(f"Transcription complete!")
