@@ -38,16 +38,17 @@ def tasks(transcription):
         length_function=len,
     )
     texts = text_splitter.split_text(transcription)
-    docs = [Document(page_content=t) for t in texts[:2]]
+    docs = [Document(page_content=t) for t in texts]
     print(docs)
 
-    prompt_template = """Extract the possible tasks of the CONTEXT, like in the following example:
+    prompt_template = """Extract the possible tasks of the CONTEXT, 
+    like in the following example:
     EXAMPLE:
     TASKS:
-    1. Create an object (assign to Mariana)
-    2. Assign the task to Pedro (assign to Pedro)
-    3. Recreate the design and image (assign to Josh)
-    4. Call the client (not yet assigned)
+    * Create an object (assign to Mariana)
+    * Assign the task to Pedro (assign to Pedro)
+    * Recreate the design and image (assign to Josh)
+    * Call the client (not yet assigned)
     CONTEXT:
     {text}
     TASKS:"""
@@ -65,7 +66,9 @@ def tasks(transcription):
         for doc in docs
     ]
 
-    prompt_template = "Create a single list and remove duplicated information: {text}?"
+    prompt_template = (
+        "Create a single list, remove duplicated tasks and summarize tasks: {text}?"
+    )
 
     llm_chain = LLMChain(llm=llm, prompt=PromptTemplate.from_template(prompt_template))
 
