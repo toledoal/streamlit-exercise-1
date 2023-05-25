@@ -7,6 +7,25 @@ from langchain.docstore.document import Document
 from langchain import OpenAI
 from langchain.text_splitter import CharacterTextSplitter
 
+# import firebase_admin
+# from firebase_admin import credentials
+# from firebase_admin import firestore
+
+# cred = credentials.Certificate("./firebase-key.json")
+# firebase_admin.initialize_app(cred)
+
+# db = firestore.client()
+
+
+# def getDocuments():
+#     doc_ref = db.collection("books").document("FDQL8EeCW32F2aXG104O")
+
+#     doc = doc_ref.get()
+#     if doc.exists:
+#         st.write(f"Document data: {doc.to_dict()}")
+#     else:
+#         st.write("No such document!")
+
 
 def load_LLM():
     """Logic for loading the chain you want to use should go here."""
@@ -39,6 +58,8 @@ def run():
 st.title("Book summarizer")
 
 st.write("## Summarize this book")
+
+# getDocuments()
 
 
 file = st.file_uploader("Upload a file", type="txt")

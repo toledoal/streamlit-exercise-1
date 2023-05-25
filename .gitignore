@@ -3,3 +3,7 @@ moby.txt
 adventure.txt
 .vscode
 .streamlit
+firebase-key.json
+fire.py
+key-to-toml.py
+conda-cheatsheet.pdf

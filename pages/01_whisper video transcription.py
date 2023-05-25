@@ -9,8 +9,16 @@ from langchain.docstore.document import Document
 from langchain.text_splitter import CharacterTextSplitter
 from langchain import LLMChain, OpenAI
 import openai
+from deta import Deta
 
 llm = OpenAI(temperature=0)
+
+# Connect to Deta Base with your Data Key
+deta = Deta(st.secrets["DETA_KEY"])
+
+# Create a new database "example-db"
+# If you need a new database, just use another name.
+db = deta.Base("example-db")
 
 
 def summarize(transcription):
@@ -95,7 +103,8 @@ def save_audio_to_tmp(file):
                 model="whisper-1",
                 response_format="text",
             )
-        return transcript
+        keyDb = db.put({"transcription": transcript, "media": file.name})
+        return (transcript, keyDb["key"])
 
 
 # extract_audio_from_video(temp_file_path, temp_output_file_path)
@@ -120,7 +129,8 @@ def save_video_to_tmp(file):
                 model="whisper-1",
                 response_format="text",
             )
-            return transcript
+            keyDb = db.put({"transcription": transcript, "media": file.name})
+            return (transcript, keyDb["key"])
 
 
 def extract_audio_from_video(video_file, output_audio_file):
@@ -145,14 +155,16 @@ if audioFile is not None:
         if audioFile.type == "audio/mpeg":
             with st.expander("Audio"):
                 st.audio(audioFile)
-                transcription = save_audio_to_tmp(audioFile)
+                (transcription, key) = save_audio_to_tmp(audioFile)
         else:
             audioFile.type == "video/mp4"
             with st.expander("Video"):
                 st.video(audioFile)
-                transcription = save_video_to_tmp(audioFile)
+                (transcription, key) = save_video_to_tmp(audioFile)
 
         st.session_state["audioFile"] = audioFile
+
+        st.write(key)
 
         with st.expander("Transcription"):
             st.write(transcription)
@@ -160,12 +172,19 @@ if audioFile is not None:
         st.session_state["audioTranscription"] = transcription
 
         summary = summarize(transcription)
+        db.update(updates={"summary": summary}, key=key)
 
         st.write("## Summary")
         st.markdown(summary)
 
         tasks = tasks(transcription)
+        db.update(updates={"tasks": tasks}, key=key)
         st.write("## Tasks")
         st.write(tasks)
 
         st.success(f"Transcription complete!")
+
+
+st.subheader("Transcriptions, Summaries and Lists")
+db_content = db.fetch().items
+st.write(db_content)
