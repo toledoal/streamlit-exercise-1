@@ -7,3 +7,4 @@ firebase-key.json
 fire.py
 key-to-toml.py
 conda-cheatsheet.pdf
+*.pdf

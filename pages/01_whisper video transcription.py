@@ -187,4 +187,10 @@ if audioFile is not None:
 
 st.subheader("Transcriptions, Summaries and Lists")
 db_content = db.fetch().items
-st.write(db_content)
+
+for item in db_content:
+    with st.expander(item["media"]):
+        st.subheader(f'File:  {item["media"]}')
+        st.write("##### Summary")
+        st.write(item["summary"])
+        st.write(item["tasks"])
